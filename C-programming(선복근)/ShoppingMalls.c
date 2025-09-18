@@ -8,7 +8,35 @@
 //	*a = *b;
 //	*b = temp;
 //}
+//git add ".\C-programming(선복근)\ShoppingMalls.c" staging형식
 
+void compute_stock(int* stocks, int* icq, int* sq, int n)
+{
+	for (int i = 0; i < n; i++) {
+		stocks[i] = icq[i] - sq[i];
+	}
+}
+void fill_id(int* id, int n) {
+	for (int i = 0; i < n; i++) {
+		id[i] = i + 1;
+	}
+}
+void minmax_with_id(int* sq, int* id, int n, int* min, int* max, int* min_id, int* max_id) {
+	*min = sq[0];
+	*max = sq[0];
+	*min_id = id[0];
+	*max_id = id[0];
+	for (int j = 1; j < n; j++) {
+		if (*min > sq[j]) {//최소값 구하는 코드
+			*min = sq[j];
+			*min_id = id[j];
+		}
+		if (*max < sq[j]) {//최대값 구하는 코드
+			*max = sq[j];
+			*max_id = id[j];
+		}
+	}
+}
 int main(void) {
 	int quantity;
 	int products;
@@ -17,6 +45,7 @@ int main(void) {
 	int total_sq = 0;
 	int total_icq = 0;
 	int min, max;
+	int temp1, temp2;
 	
 	
 
@@ -50,26 +79,9 @@ int main(void) {
 		sq[i] = sales;
 		total_sq += sq[i];
 	}
-	for (int i = 0; i < quantity; i++) {
-		stocks[i] = icq[i] - sq[i];
-	}
-	for (int i = 0; i < quantity; i++) {
-		id[i] = i+1;
-	}
-	max = sq[0];
-	min = sq[0];
-	int temp1 = id[0];
-	int temp2 = id[0];
-	for (int j = 1; j < quantity; j++) {
-		if (min > sq[j]) {//최소값 구하는 코드
-			min = sq[j];
-			temp1 = id[j];
-		}
-		if (max < sq[j]) {//최대값 구하는 코드
-			max = sq[j];
-			temp2 = id[j];
-		}
-	}
+	compute_stock(stocks, icq, sq, quantity);
+	fill_id(id, quantity);
+	minmax_with_id(sq, id, quantity, &min, &max, &temp1, &temp2);
 	
 	/*for (int i = 0; i < quantity - 1; i++) {
 		int most = i;
