@@ -37,6 +37,16 @@ void minmax_with_id(int* sq, int* id, int n, int* min, int* max, int* min_id, in
 		}
 	}
 }
+void print_low_stock(int* stocks, int* id, int n) {
+	for (int i = 0; i < n; i++) {
+		if (stocks[i] <= 2) {
+			printf("상품ID %d: 재고부족%d\n", id[i], stocks[i]);
+		}
+	}
+}
+float sales_rate(int total_icq, int total_sq) {
+	return ((float)total_sq / total_icq) * 100;
+}
 int main(void) {
 	int quantity;
 	int products;
@@ -59,7 +69,15 @@ int main(void) {
 	stocks = malloc(MAX_SIZE * sizeof(int));
 	id = malloc(MAX_SIZE * sizeof(int));
 	printf("상품 개수를 입력하여주십시오.(1~%d)사이의 값 한정", MAX_SIZE);
-	scanf("%d", &quantity);
+	if (scanf("%d", &quantity) != 1 || quantity < 1 || quantity > MAX_SIZE) {
+		fprintf(stderr, "잘못된 입력입니다. 프로그램을 종료합니다.\n");
+		free(icq);
+		free(sq);
+		free(stocks);
+		free(id);
+		return 1;
+	}
+	
 
 	icq = realloc(icq, quantity * sizeof(int));
 	sq = realloc(sq, quantity * sizeof(int));
@@ -82,7 +100,7 @@ int main(void) {
 	compute_stock(stocks, icq, sq, quantity);
 	fill_id(id, quantity);
 	minmax_with_id(sq, id, quantity, &min, &max, &temp1, &temp2);
-	
+	float rate = sales_rate(total_icq, total_sq);
 	/*for (int i = 0; i < quantity - 1; i++) {
 		int most = i;
 		for (int j = i + 1; j < quantity; j++) {
@@ -96,14 +114,10 @@ int main(void) {
 	for (int i = 0; i < quantity; i++) {
 		printf("모든 상품의 재고 출력: %d\n", stocks[i]);
 	}
-	printf("총 판매량: %d\n판매율: %.2f\n", total_sq, ((float)total_sq / total_icq)*100);
+	printf("총 판매량: %d\n판매율: %.2f\n", total_sq, rate);
 	printf("ID: %d, 최대 판매량: %d\n", temp2, max);
 	printf("ID: %d, 최소판매량: %d\n", temp1, min);
-	for (int i = 0; i < quantity; i++) {
-		if (stocks[i] <= 2) {
-			printf("상품ID %d: 재고부족%d\n", id[i], stocks[i]);
-		}
-	}
+	print_low_stock(stocks, id, quantity);
 	/*for(int i = 0; i < quantity; i++) {
 		printf("판매량 순위: %d", sq[i]);
 	}*/
