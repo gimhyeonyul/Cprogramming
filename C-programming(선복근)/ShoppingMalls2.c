@@ -57,7 +57,7 @@ int print_menu(void) {
 		return -1;
 	return menu;
 }
-void action_receive(int* icq, int* id, int n, int products) {
+void action_receive(int* icq,int* total_icq,int* id, int n, int products) {
 	int choice;
 	printf("입고수량 입력: 전체 상품 입고수량 입력 1, 개별 상품 입력 2를 선택\n");
 	scanf("%d", &choice);
@@ -65,6 +65,7 @@ void action_receive(int* icq, int* id, int n, int products) {
 		for(int i = 0; i < n; i++){
 			printf("입고수량을 하나씩 입력하십시오.\n");
 			scanf("%d", &products);
+			*total_icq += products;
 			icq[i] = products;
 		}
 	}
@@ -84,7 +85,7 @@ void action_receive(int* icq, int* id, int n, int products) {
 		fprintf(stderr, "잘못된 선택입니다(1)또는(2).\n");
 	}
 }
-void action_sales(int* sq, int* icq, int* id, int n, int products) {
+void action_sales(int* sq, int* icq, int* id,int* total_sq,int n, int products) {
 	int choice;
 	printf("판매수량 입력: 전체 상품 판매수량 입력 1, 개별 상품 입력 2를 선택\n");
 	scanf("%d", &choice);
@@ -93,6 +94,7 @@ void action_sales(int* sq, int* icq, int* id, int n, int products) {
 			printf("판매수량을 하나씩 입력하십시오.");
 			printf("%d보다 작아야합니다.", icq[i]);
 			scanf("%d", &products);
+			*total_sq += products;
 			sq[i] = products;
 		}
 	}
@@ -165,7 +167,7 @@ int main(void) {
 	sq = realloc(sq, quantity * sizeof(int));
 	stocks = realloc(stocks, quantity * sizeof(int));
 	id = realloc(id, quantity * sizeof(int));
-
+	fill_id(id, quantity);
 	for (;;) {
 		int menu = print_menu();
 		if(menu == -1){
@@ -175,10 +177,10 @@ int main(void) {
 
 		switch (menu) {
 		case 1:
-			action_receive(icq, id, quantity, products);
+			action_receive(icq,&total_icq,id, quantity, products);
 			break;
 		case 2:
-			action_sales(sq, icq, id, quantity, products);
+			action_sales(sq, icq, id, &total_sq, quantity, products);
 			break;
 		case 3:
 			action_status(icq, sq, stocks, id,
