@@ -57,58 +57,73 @@ int print_menu(void) {
 		return -1;
 	return menu;
 }
-void action_receive(int* icq,int* total_icq,int* id, int n, int products) {
+void action_receive(int* icq,int* total_icq,int* id, int n) {
 	int choice;
+	int i = 0;
+	static int icq_input = 0;
 	printf("입고수량 입력: 전체 상품 입고수량 입력 1, 개별 상품 입력 2를 선택\n");
 	scanf("%d", &choice);
 	if (choice == 1) {
-		for(int i = 0; i < n; i++){
-			printf("입고수량을 하나씩 입력하십시오.\n");
-			scanf("%d", &products);
-			*total_icq += products;
-			icq[i] = products;
+		printf("입고수량을 입력하시오. 예: (10 20 30 40 50'\\n')\n");
+		while (i < n && scanf("%d", &icq[i]) == 1) {
+			*total_icq += icq[i];
+			i++;
+			if (getchar() == '\n')
+				break;
 		}
+		icq_input = 1;
 	}
 	else if (choice == 2) {
-		for (int i = 0; i < n; i++) {
-			id[i] = i + 1;
+		if(!icq_input){
+			printf("먼저 전체 상품 입고수량을 입력하여주십시오.\n");
+			return;
+		}
+		else {
+			for (int i = 0; i < n; i++) {
+				id[i] = i + 1;
+			}
 		}
 		int id_input = 0;
-		printf("개별 상품의 아이디를 입력하시오 1부터 %d까지.\n", n);
+		printf("궁금하신 상품의 아이디를 입력하시오 1부터 %d까지.\n", n);
 		scanf("%d", &id_input);
-		printf("해당 상품의 입고수량을 입력하시오.\n");
-		scanf("%d", &products);
-		icq[id_input - 1] = products;
-		printf("입고수량: %d", icq[id_input - 1]);
+		printf("해당 ID의 입고수량은 %d입니다. \n", icq[id_input - 1]);
 	}
 	else {
 		fprintf(stderr, "잘못된 선택입니다(1)또는(2).\n");
 	}
 }
-void action_sales(int* sq, int* icq, int* id,int* total_sq,int n, int products) {
+void action_sales(int* sq, int* icq, int* id,int* total_sq,int n) {
+	static int sales_input = 0;
 	int choice;
+	int i = 0;
 	printf("판매수량 입력: 전체 상품 판매수량 입력 1, 개별 상품 입력 2를 선택\n");
 	scanf("%d", &choice);
 	if (choice == 1) {
-		for (int i = 0; i < n; i++) {
-			printf("판매수량을 하나씩 입력하십시오.");
-			printf("%d보다 작아야합니다.", icq[i]);
-			scanf("%d", &products);
-			*total_sq += products;
-			sq[i] = products;
+		printf("판매수량을 입력하시오. (입고량 수를 초과하면 안됍니다) 예: (9 19 29 39 49'\\n')\n");
+		while (i < n && scanf("%d", &sq[i]) == 1) {
+			*total_sq += sq[i];
+			i++;
+			if (getchar() == '\n')
+				break;
 		}
+		sales_input = 1;
 	}
 	else if (choice == 2) {
-		for (int i = 0; i < n; i++) {
-			id[i] = i + 1;
+		if(!sales_input) {
+			printf("먼저 전체 상품 판매수량을 입력하여주십시오.\n");
+			return;
 		}
+		else {
+			for (int i = 0; i < n; i++) {
+				id[i] = i + 1;
+			}
+		}
+		
 		int id_input = 0;
 		printf("개별 상품의 아이디를 입력하시오 1부터 %d까지.\n", n);
 		scanf("%d", &id_input);
-		printf("해당 상품의 판매수량을 입력하시오.\n");
-		scanf("%d", &products);
-		sq[id_input - 1] = products;
-		printf("판매수량: %d", sq[id_input - 1]);
+		printf("해당 ID의 입고수량은 %d입니다. \n", icq[id_input - 1]);
+		
 	}
 	else {
 		fprintf(stderr, "잘못된 선택입니다(1)또는(2).\n");
@@ -168,7 +183,7 @@ int main(void) {
 	stocks = realloc(stocks, quantity * sizeof(int));
 	id = realloc(id, quantity * sizeof(int));
 	fill_id(id, quantity);
-	for (;;) {
+	while(1) {
 		int menu = print_menu();
 		if(menu == -1){
 			fprintf(stderr, "잘못된 입력입니다(1~4)중 입력해주세요.\n");
@@ -177,10 +192,10 @@ int main(void) {
 
 		switch (menu) {
 		case 1:
-			action_receive(icq,&total_icq,id, quantity, products);
+			action_receive(icq,&total_icq,id, quantity);
 			break;
 		case 2:
-			action_sales(sq, icq, id, &total_sq, quantity, products);
+			action_sales(sq, icq, id, &total_sq, quantity);
 			break;
 		case 3:
 			action_status(icq, sq, stocks, id,
@@ -194,20 +209,7 @@ int main(void) {
 		}
 	}
 
-	for (int i = 0; i < quantity; i++) {
-		printf("입고수량을 하나씩 입력하십시오.");
-		scanf("%d", &products);
-		icq[i] = products;
-		total_icq += icq[i];
-	}
-	for (int i = 0; i < quantity; i++) {
-		printf("판매수량을 하나씩 입력하십시오.");
-		printf("%d보다 작아야합니다.", icq[i]);
-		scanf("%d", &sales);
-		sq[i] = sales;
-		total_sq += sq[i];
-	}
-	fill_id(id, quantity);
+	
 	/*for (int i = 0; i < quantity - 1; i++) {
 		int most = i;
 		for (int j = i + 1; j < quantity; j++) {
